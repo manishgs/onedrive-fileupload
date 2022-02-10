@@ -1,10 +1,13 @@
-const axios = require('axios');
+import formidable from "formidable";
+import fs from "fs";
 
-const handler = (req, res) => {
+const axios = require('axios');
+  
+const handler = async (req, res) => {
 	const { method } = req;
 	switch (method) {
 		case 'PUT':
-			upload(req, res);
+			await upload(req, res);
 			break;
 		default:
 			return res.status(405).send(`Method ${method} not allowed`);
@@ -12,9 +15,26 @@ const handler = (req, res) => {
 };
 
 const upload = async (req, res) => {
-	const { filename, accessToken, content, parentId, fileType } = req.body;
-	const url = `https://graph.microsoft.com/v1.0/users/69e5bc0d-ef63-4040-88cf-0ada867b7afa/drive/items/${parentId}:/${filename}:/content`;
+	const form = new formidable.IncomingForm();
 	try {
+		await new Promise((resolve) => {
+			form.parse(req, async  (err, fields, files) => {
+				const result  = await uploadToDrive(files.file, fields.parentId, files.accessToken);
+				res.status(200).send(result);
+			});
+		})
+	} catch (err) {
+		console.log(err);
+		res.status(500).send(err);
+	}
+};
+
+
+const uploadToDrive = async (file,  parentId, accessToken) => {
+	const content = fs.readFileSync(file.filepath, { encoding: 'utf8'})
+	const filename = file.originalFilename;
+	const fileType = file.mimetype;
+	const url = `https://graph.microsoft.com/v1.0/users/69e5bc0d-ef63-4040-88cf-0ada867b7afa/drive/items/${parentId}:/${filename}:/content`;
 		const result = await axios({
 			method: 'put',
 			url: url,
@@ -24,18 +44,12 @@ const upload = async (req, res) => {
 				'Content-Type': fileType,
 			},
 		});
-		res.status(200).send(result.data);
-	} catch (err) {
-		console.log(err);
-		res.status(500).send(err);
-	}
-};
+		return result.data;
+}
 
 export const config = {
 	api: {
-		bodyParser: {
-			sizeLimit: '4mb', // Set desired value here
-		},
+		bodyParser: false,
 	},
 };
 
