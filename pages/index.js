@@ -4,13 +4,11 @@ export default function Home() {
 	const [file, setFile] = useState('');
 
 	const handleUpload = async (e) => {
-		const res = await axios.put(`/api/file`, {
-			accessToken: token,
-			filename: file.name,
-			fileType: file.type,
-			content: file,
-			parentId: '01XA3PFKG7YWH2K7QVIZCYRP33XLQEHLZG',
-		});
+		const body = new FormData();
+		body.append("file", file);
+		body.append("accessToken", 'accessToken');
+		body.append("parentId", '01XA3PFKG7YWH2K7QVIZCYRP33XLQEHLZG');
+		const res = await axios.put(`/api/file`, body);
 		console.log(res.data);
 	};
 	return (
