@@ -31,7 +31,7 @@ const upload = async (req, res) => {
 
 
 const uploadToDrive = async (file,  parentId, accessToken) => {
-	const content = fs.readFileSync(file.filepath, { encoding: 'utf8'})
+	const content = fs.readFileSync(file.filepath)
 	const filename = file.originalFilename;
 	const fileType = file.mimetype;
 	const url = `https://graph.microsoft.com/v1.0/users/69e5bc0d-ef63-4040-88cf-0ada867b7afa/drive/items/${parentId}:/${filename}:/content`;
