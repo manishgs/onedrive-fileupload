@@ -19,7 +19,7 @@ const upload = async (req, res) => {
 	try {
 		await new Promise((resolve) => {
 			form.parse(req, async  (err, fields, files) => {
-				const result  = await uploadToDrive(files.file, fields.parentId, files.accessToken);
+				const result  = await uploadToDrive(files.file, fields.parentId, fields.accessToken);
 				res.status(200).send(result);
 			});
 		})
